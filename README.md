@@ -1,6 +1,8 @@
 # az_ozone
 Continuation of my thesis work for surface ozone modeling. Expanding to allow for automated ML processing of raster data.
 The Goal:
+
+
                 ┌────────────────────────────┐
                 │        Data Sources        │
                 │                            │
