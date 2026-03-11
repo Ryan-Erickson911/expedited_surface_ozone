@@ -1,0 +1,7 @@
+{
+  "error": {
+    "code": 400,
+    "message": "The geometry type 'Empty' cannot be stored in a shapefile.",
+    "status": "INVALID_ARGUMENT"
+  }
+}
