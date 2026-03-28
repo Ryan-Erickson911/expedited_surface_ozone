@@ -1,0 +1,231 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Ryan Erickson</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="icon" type="image/x-icon" href="assets/imgs/icos/mesign.ico">
+		<script src="https://kit.fontawesome.com/a4631bf45a.js" crossorigin="anonymous"></script>
+		<script src="https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js"></script>
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-ajax/2.1.0/leaflet.ajax.js"></script>
+        <script src="https://unpkg.com/leaflet-draw/dist/leaflet.draw.js"></script>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+        <link rel="stylesheet" href="https://unpkg.com/leaflet-draw/dist/leaflet.draw.css"/>
+		<link rel="stylesheet" href="assets/css/main.css" id="doc-theme"/>
+	</head>
+	<body class="homepage is-preload">
+		<div id="page-wrapper">
+			<div id="header-wrapper">
+				<div class="container">
+					<header id="header">
+						<div class="inner">
+							<h1 id="logosandhome" style="padding-left: 0em; transition: 0.5s ease;">
+								<span>
+									<a href="https://github.com/Ryan-Erickson911" target='_blank' id="logo"><img src="assets/imgs/svgs/GitHubLight.webp" width="30px" height="30px" id="gitIcon"></img></a>&nbsp;
+									<!-- <a href="index.html" id="logo2"><i class="fa fa-home" width="20px" height="20px"></i></a> -->
+									<a href="#" id="logo2"><img src="assets/imgs/svgs/mesign.webp" id="doc-icon" width="30px" height="30px"></a> <!-- onclick="changeTheme();return false;" width="29px" height="29px"></a> -->
+								</span>
+							</h1> 
+							<nav id="nav">			
+								<ul>
+									<li style="display: none;">
+										<a href="#">About</a>
+										<ul>
+											<li><a href="#biography" target="_self">Bio</a></li>
+											<li><a href="#experience" target="_self">Experience</a></li>
+											<li><a href="#accomplishments" target="_self">Blog</a></li>
+										</ul>
+									</li>
+									<li style="display: none;">
+										<a href="#">Contact</a>
+										<ul>
+											<li><a href="main_pages/resume.html" target='_self'>Resume</a></li>
+											<li><a href="main_pages/cv.html" target='_self'>CV</a></li>
+											<li><a href="https://www.linkedin.com/in/ryan-ericksons-profile/" target='_blank'>Linkedin</a></li>
+											<li><a href="https://boulder.joinhandshake.com/profiles/rerickson" target='_blank'>Handshake</a></li>
+										</ul>
+									</li>
+									<li>
+										<a href="#">GIS</a>
+										<ul>
+											<li><a href="tutorial_pages/re_tutorials_index.html">Tutorials</a></li>
+											<li><a href="https://geemap.org/" target='_blank'>geemap (Dr. WU)</a></li>
+											<li><a href="https://www.arcgis.com/index.html" target='_blank'>Esri</a></li>
+											<li><a href="https://qgis.org/" target='_blank'>QGIS</a></li>
+											<li><a href="https://grass.osgeo.org/" target='_blank'>GRASS</a></li>
+										</ul>
+									</li>
+									<li>
+										<a href="#">Affiliations</a>
+										<ul>
+											<li><a href="https://www.colorado.edu/geography/ryan-erickson" target='_blank'>CU Profile</a></li>
+											<li><a href="https://www.spatstat.com/people/" target='_blank'>STAR Lab</a></li>
+											<li><a href="https://ibs.colorado.edu/people/ryan-erickson/" target='_blank'>CUPC</a></li>
+											<li><a href="https://cires.colorado.edu/people/ryan-erickson#ceca" target='_blank'>CECA</a></li>
+										</ul>
+									</li>
+									<li>
+										<a href="#">Data</a>
+										<ul>
+											<li><a href="https://www.epa.gov/outdoor-air-quality-data" target='_blank'>EPA AQS</a></li>
+											<li><a href="https://epsg.io/" target='_blank'>Epsg.io</a></li>
+											<li><a href="https://developers.google.com/earth-engine/datasets/" target='_blank'>Google EE</a></li>
+											<li><a href="https://www.openstreetmap.org/#map=5/38.01/-95.84" target='_blank'>OSM</a></li>
+											<li><a href="https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html" target='_blank'>TIGER/Line</a></li>
+											<li><a href="https://www.ccacoalition.org/resources/toar-data-portal-home-tropospheric-ozone-data" target='_blank'>T.O.A.R</a></li>
+											<li><a href="https://www.unep.org/publications-data" target='_blank'>UNEP</a></li>
+										</ul>
+									</li>
+									<li>
+										<a href="#">Java</a>
+										<ul>
+											<li><a href="tutorial_pages/Java/rejava_index.html">Tutorials</a></li>
+											<li><a href="https://www.oracle.com/java/technologies/downloads/" target='_blank'>Download</a></li>
+											<li><a href="https://eclipseide.org/" target='_blank'>Eclipse</a></li>
+											<li><a href="https://medium.com/javarevisited/25-reasons-why-java-is-still-around-in-2024-452c582d55d0" target='_blank'>Why Java?</a></li>
+										</ul>
+									</li>
+									<li>
+										<a href="#">Python</a>
+										<ul>
+											<li><a href="tutorial_pages/Python/repython_index.html">Tutorials</a></li>
+											<li><a href="https://www.python.org/downloads/" target='_blank'>Download</a></li>
+											<li><a href="https://anaconda.org/conda-forge/openai" target='_blank'>Anaconda</a></li>
+											<li><a href="https://code.visualstudio.com/" target='_blank'>VS Code</a></li>
+										</ul>
+									</li>
+									<li>
+										<a href="#">R</a>
+										<ul>
+											<li><a href="tutorial_pages/R/rer_index.html">Tutorials</a></li>
+											<li><a href="https://www.r-project.org/" target='_blank'>Download</a></li>
+											<li><a href="https://posit.co/downloads/" target='_blank'>RStudio</a></li>
+											<li><a href="https://positron.posit.co/" target='_blank'>Positron</a></li>
+										</ul>
+									</li>
+								</ul>
+							</nav>
+						</div>
+					</header>
+				</div>
+			</div>
+            <div id="main-wrapper">
+				<div class="wrapper style1">
+					<div class="inner">
+						<section class="container box feature1">
+							<div class="row">
+								<div class="col-12">
+									<header>
+                                        <h3>I like making, integrating, and sharing GIS solutions and projects</h3>
+									</header>							
+								</div>
+								<div class="col-12">
+                                    <center><div id="map"></div></center>
+                                    <script src="assets/js/map.js"></script>
+								</div>
+								<div class="col-12">
+									<section>
+									<p>
+										<br>
+										This project is dedicated to my work as an MA with Dr. Guofeng Cao. I had to create surface ozone exposures for public health studies and this is where we started! 
+                                        The EPA monitors numerous pollutants throughout the US. Click a state to zoom to it. Select a set of points to see a quick summary.
+										<br>
+										<br>
+										This map is meant to depict the spatial distribution of the EPA's monitoring locations. 
+                                        It also includes monitoring data and satillite information from the Tropospheric Ozone Assessment Report (<a href="https://igacproject.org/activities/TOAR">T.O.A.R</a>)
+									</p>
+									</section>
+								</div>
+							</div>
+						</section>
+					</div>
+				</div>
+            </div>
+            <div id="footer-wrapper">
+				<footer id="footer" class="container">
+					<div class="row" id="contact">
+						<div class="col-3 col-6-medium col-12-small">
+							<section>
+								<div class="row">
+									<div class="col-6-medium col-12-small">
+										<dl class="contact">
+											<dt>Address</dt>
+											<dd>
+												Tacoma, WA 98444<br />
+											</dd>
+										</dl>
+										<dl class="contact">
+											<dt>Emails</dt>
+											<dd><a href="mailto:ryanerickson407@gmail.com">ryanerickson407@gmail.com</a></dd>
+											<dd><a href="mailto:ryer7052@colorado.edu">ryer7052@colorado.edu</a></dd>
+											<dd><a href="mailto:ryan.erickson-1@colorado.edu">ryan.erickson-1@colorado.edu</a></dd>
+										</dl>
+									</div>
+									<div class="col-6-medium col-12-small">	
+										<section>
+											<h2>Send me a message!</h2>
+											<dl class="contact">
+												<dt>Name</dt>
+												<dd>
+													<form>
+														<select>
+															<textarea>Resume</textarea>
+														</select>
+													</form>
+												</dd>
+												<dt>Email</dt>
+												<dd><form><input type="email"></input></form></dd>
+												<dt>Comment</dt>
+												<dd><form><input type="text"></input></dd>
+											</dl>
+										</section>
+									</div>
+								</div>
+							</section>
+						</div>
+						<div class="col-3 col-6-medium col-12-small">
+							<section>
+								<center><h2>Institutions and Research Labs</h2></center>
+								<ul class="divided">
+									<li><a href="https://ibs.colorado.edu/">Institute of Behavioral Sciences</a></li>
+									<li><a href="https://hazards.colorado.edu/">Natural Hazards Center</a></li>
+									<li><a href="https://cupc.colorado.edu/">Colorado University Population Center</a></li>
+									<li><a href="https://cires.colorado.edu/">Cooperative Institute for Research and Environmental Sciences</a></li>
+								</ul>
+							</section>
+							<section>
+								<center><h2>Online Profiles</h2></center>
+								<ul class="divided">
+									<li><a href="https://www.colorado.edu/geography/ryan-erickson">CU Profile</a></li>
+									<li><a href="https://www.linkedin.com/in/ryan-ericksons-profile/">Linkedin</a></li>
+									<li><a href="https://www.handshake.com/in/ryan-ericksons-profile/">Handshake</a></li>
+									<li><a href="https://www.handshake.com/in/ryan-ericksons-profile/">Indeed</a></li>
+									<li><a href="https://github.com/Ryan-Erickson911">GitHub</a></li>
+								</ul>
+							</section>
+						</div>
+						<div class="col-6 col-12-medium imp-medium">
+							<section>	
+								<center><h2><strong>TL;DR</strong></h2></center>
+								<center><p>I'm an MA in Geography focusing on GIS application and software development. Please reach out should you have any questions about my work, collaboration, or materials.</p></center>
+							</section>
+						</div>
+					</div>
+					<div id="copyright">
+						<ul class="menu">
+							<li>&copy; R.Erickson. All rights reserved</li><li>Design: <a href="https://html5up.net">HTML5 UP</a> / <a href="https://www.w3schools.com/">W3 Schools</a></li><li>Base: <a href="https://html5up.net/zerofour">ZeroFour</a></li>
+						</ul>
+					</div>
+				</footer>
+			</div>
+        </div>
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.dropotron.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/theme.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+    </body>
+</html>
