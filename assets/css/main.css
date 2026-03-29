@@ -1,12 +1,6 @@
 @import url("https://fonts.googleapis.com/css?family=Open+Sans:400,400italic,700,800");
 @import url("fontawesome-all.min.css");
 
-/*
-	ZeroFour by HTML5 UP
-	html5up.net | @ajlkn
-	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
-*/
-
 html, body, div, span, applet, object,
 iframe, h1, h2, h3, h4, h5, h6, p, blockquote,
 pre, a, abbr, acronym, address, big, cite,
@@ -1990,7 +1984,7 @@ input, select, textarea {
 	}
 
 	#top-wrapper {
-		margin-left: 15%;
+		margin-left: 0%;
  		transition: 0.5s ease;
 		background: url("images/headernorm.webp");
 		background-position: center center;
@@ -1999,13 +1993,13 @@ input, select, textarea {
 	}
 
 	#main-wrapper {
-		margin-left: 15%;
+		margin-left: 0%;
  		transition: 0.5s ease;
 		background: #fff;
 	}
 
 	#footer-wrapper {
-		margin-left: 15%;
+		margin-left: 0%;
  		transition: 0.5s ease;
 		background-image: -moz-linear-gradient(top, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.5)), url("images/bg03.png"), url("images/bg02.png");
 		background-image: -webkit-linear-gradient(top, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.5)), url("images/bg03.png"), url("images/bg02.png");
@@ -2148,7 +2142,7 @@ input, select, textarea {
 
 
     #map {
-		width: 90%;
+		width: 70%;
 		height: 650px; 
 	}
 /* Large */

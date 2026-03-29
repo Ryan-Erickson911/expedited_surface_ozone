@@ -13,50 +13,6 @@ const toplogos = document.getElementById("logosandhome");
 const menuicon = document.getElementById("motionbutton");
 let movement = 1;
 
-function NavControl() {
-  if (movement==1) {
-    menuicon.innerHTML="&#9776;";
-    menuicon.style.top="28px";
-    menuicon.style.left="1.5em";
-    msidew.classList.add("hidden");
-    msidew.classList.remove("visible");
-    toplogos.style.paddingLeft = "2em";
-    document.getElementById("top-wrapper").style.marginLeft="0%";
-    document.getElementById("main-wrapper").style.marginLeft="0%";
-    document.getElementById("footer-wrapper").style.marginLeft="0%";
-	  contactheader.style.width="100%";
-    return movement=0;
-  } else {
-    menuicon.innerHTML = "X";
-    menuicon.style.top="150px";
-    menuicon.style.left="2.5em";
-    msidew.classList.remove("hidden");
-    msidew.classList.add("visible");
-    toplogos.style.paddingLeft = "0em";
-	  document.getElementById("top-wrapper").style.marginLeft="15%";
-	  document.getElementById("main-wrapper").style.marginLeft="15%";
-	  document.getElementById("footer-wrapper").style.marginLeft="15%";
-	  contactheader.style.width="85%";
-    return movement=1;
-  }
-}
-
-function checkmargins() {
-  if (window.innerWidth < 980) {
-    menuicon.innerHTML="&#9776;";
-    menuicon.style.top="28px";
-    menuicon.style.left="1.5em";
-    msidew.classList.add("hidden");
-    msidew.classList.remove("visible");
-    toplogos.style.paddingLeft = "2em";
-    document.getElementById("top-wrapper").style.marginLeft="0%";
-    document.getElementById("main-wrapper").style.marginLeft="0%";
-    document.getElementById("footer-wrapper").style.marginLeft="0%";
-	  contactheader.style.width="100%";
-    return movement=0;
-  }
-}
-
 function changeTheme() {
   const theme = document.getElementById("doc-theme");
   if (theme.getAttribute("href") === mainTheme) {
