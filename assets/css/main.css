@@ -2145,6 +2145,16 @@ input, select, textarea {
 		width: 70%;
 		height: 650px; 
 	}
+
+	.state-label {
+		background: transparent;
+		border: none;
+		box-shadow: none;
+		color: white;
+		font-weight: bold;
+		font-size: 14px;
+		text-shadow: 0 0 4px black;
+	}
 /* Large */
 
 	@media screen and (max-width: 1280px) {

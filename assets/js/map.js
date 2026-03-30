@@ -1,9 +1,10 @@
 // --------------------------------------------------
 // MAP SETUP
 // --------------------------------------------------
+const BACKEND = "https://739mb0wj4b.execute-api.us-west-2.amazonaws.com";
 const map = L.map('map', {
     center: [36.99914216255409, -109.04537518899879],
-    zoom: 7
+    zoom: 6
 });
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
@@ -69,11 +70,47 @@ nightLightsLayer.addTo(map);
 let statesGeoJSON;
 statesGeoJSON = new L.GeoJSON.AJAX("/data/geojson/rerickson_2018_us_state_500k.geojson", {
     style: { color: 'gold', weight: 2, fillOpacity: 0.1 },
+
     onEachFeature: (feature, layer) => {
+
+        // Default Leaflet "center"
+        const leafletCenter = layer.getBounds().getCenter();
+        const centerPoint = turf.point([leafletCenter.lng, leafletCenter.lat]);
+
+        // Check if that point is actually inside the state
+        const isInside = turf.booleanPointInPolygon(centerPoint, feature);
+
+        let labelLatLng;
+
+        if (isInside) {
+            // Safe to use Leaflet center
+            labelLatLng = leafletCenter;
+        } else {
+            // Use a guaranteed interior point
+            const insidePoint = turf.pointOnFeature(feature);
+            const [lng, lat] = insidePoint.geometry.coordinates;
+            labelLatLng = L.latLng(lat, lng);
+        }
+
+        // Invisible marker to anchor the label
+        L.marker(labelLatLng, {
+            interactive: false,
+            opacity: 0
+        })
+        .addTo(statesLayer)
+        .bindTooltip(feature.properties.NAME, {
+            permanent: true,
+            direction: "center",
+            className: "state-label"
+        });
+
+        // --- POPUP ---
         layer.bindPopup(
-					`<center><b>${feature.properties.alt_title}</b></center><br><br>
-					<img src="${feature.properties.image}" style="width:100%;max-width:200px;display:block;margin:8px auto;"><br>
-					${feature.properties.description}`);
+            `<center><b>${feature.properties.alt_title}</b></center><br><br>
+             <img src="${feature.properties.image}" style="width:100%;max-width:200px;display:block;margin:8px auto;"><br>
+             ${feature.properties.description}`
+        );
+
         layer.on("click", () => map.fitBounds(layer.getBounds()));
     }
 }).addTo(statesLayer);
@@ -163,14 +200,14 @@ map.on(L.Draw.Event.CREATED, async function (event) {
 
     // Cities
     citiesGeoJSON.eachLayer(l=>{
-        const inside = turf.booleanPointInPolygon(l.toGeoJSON(), drawnPolygon);
+        let inside = turf.booleanPointInPolygon(l.toGeoJSON(), drawnPolygon);
         l.setStyle(cityStyle(inside));
         if(inside) selectedCities.push(l.feature.properties.Municipality);
     });
 
     // Monitors
     epaGeoJSON.eachLayer(l=>{
-        const inside = turf.booleanPointInPolygon(l.toGeoJSON(), drawnPolygon);
+        let inside = turf.booleanPointInPolygon(l.toGeoJSON(), drawnPolygon);
         l.setStyle(monitorStyle(inside));
         if(inside) selectedMonitors.push(l.feature.properties.site);
     });
@@ -183,22 +220,22 @@ map.on(L.Draw.Event.CREATED, async function (event) {
         }
     });
 
-    const ntl = await fetch("/ntlSummary", {
-        method:"POST",
+    let ntl = await fetch(`${BACKEND}/ntlSummary`, {
+        method: "POST",
         body: JSON.stringify(drawnPolygon),
-        headers: {"Content-Type":"application/json"}
-    }).then(r=>r.json());
+        headers: { "Content-Type": "ai_engine/application/json" }
+    }).then(r => r.json());
 
-    const aiSummary = await fetch("/aiSummary", {
-        method:"POST",
+    let aiSummary = await fetch(`${BACKEND}/aiSummary`, {
+        method: "POST",
         body: JSON.stringify({
             cities: selectedCities,
             monitors: selectedMonitors,
             states: statesTouched,
             ntlStats: ntl
         }),
-        headers: {"Content-Type":"application/json"}
-    }).then(r=>r.text());
+        headers: { "Content-Type": "ai_engine/application/json" }
+    }).then(r => r.text());
 
     L.popup()
         .setLatLng(event.layer.getBounds().getCenter())

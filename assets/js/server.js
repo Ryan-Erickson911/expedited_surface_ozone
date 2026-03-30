@@ -1,32 +1,34 @@
-import express from "express";
-import OpenAI from "openai";
+require('dotenv').config();
+import express, { json } from 'express';
+import cors from 'cors';
+
+import { ntlSummary } from './gee';
+import { generateSummary } from './ai';
 
 const app = express();
-app.use(express.json());
+app.use(cors());
+app.use(json());
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-app.post("/api/ai-summary", async (req, res) => {
-    const { cities, monitors } = req.body;
-
-    const prompt = `
-You are a GIS analyst. Summarize all objects in the selected location.
-
-Cities inside area:
-${cities.join(", ")}
-
-EPA monitors inside area:
-${monitors.map(m => `${m.site} in ${m.county} measured ${m.measurement}`).join("\n")}
-
-Write geographic, ecological, and/or environmental summaries of this region.
-`;
-
-    const completion = await client.chat.completions.create({
-        model: "gpt-4.1",
-        messages: [{ role: "user", content: prompt }]
-    });
-
-    res.json({ summary: completion.choices[0].message.content });
+// --- NTL endpoint ---
+app.post('/ntlSummary', async (req, res) => {
+    try {
+        const stats = await ntlSummary(req.body);
+        res.json(stats);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("GEE error");
+    }
 });
 
-app.listen(3000, () => console.log("Server running on 3000"));
+// --- AI endpoint ---
+app.post('/aiSummary', async (req, res) => {
+    try {
+        const summary = await generateSummary(req.body);
+        res.send(summary);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("AI error");
+    }
+});
+
+app.listen(3000, () => console.log("Server running on port 3000"));
