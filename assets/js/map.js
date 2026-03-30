@@ -73,26 +73,19 @@ statesGeoJSON = new L.GeoJSON.AJAX("/data/geojson/rerickson_2018_us_state_500k.g
 
     onEachFeature: (feature, layer) => {
 
-        // Default Leaflet "center"
         const leafletCenter = layer.getBounds().getCenter();
         const centerPoint = turf.point([leafletCenter.lng, leafletCenter.lat]);
-
-        // Check if that point is actually inside the state
         const isInside = turf.booleanPointInPolygon(centerPoint, feature);
 
         let labelLatLng;
-
         if (isInside) {
-            // Safe to use Leaflet center
             labelLatLng = leafletCenter;
         } else {
-            // Use a guaranteed interior point
             const insidePoint = turf.pointOnFeature(feature);
             const [lng, lat] = insidePoint.geometry.coordinates;
             labelLatLng = L.latLng(lat, lng);
         }
 
-        // Invisible marker to anchor the label
         L.marker(labelLatLng, {
             interactive: false,
             opacity: 0
@@ -105,9 +98,7 @@ statesGeoJSON = new L.GeoJSON.AJAX("/data/geojson/rerickson_2018_us_state_500k.g
         });
 
         layer.on("click", () => {
-
             map.fitBounds(layer.getBounds());
-
             stateInfoControl.setContent(`
                 <b>${feature.properties.alt_title}</b><br>
                 <img src="${feature.properties.image}" 
@@ -130,12 +121,9 @@ let citiesGeoJSON = new L.GeoJSON.AJAX("/data/geojson/usa_major_cities.geojson",
             Type: ${f.properties.Type}
         `)
 }).addTo(citiesLayer);
-citiesGeoJSON.eachLayer(l=>{
-    const type = l.feature.properties.Type;
-    const inside = turf.booleanPointInPolygon(l.toGeoJSON(), drawnPolygon);
-    l.setStyle(cityStyle(type, inside));
-    if(inside) selectedCities.push(l.feature.properties.Municipality);
-});
+// NOTE: Removed stray citiesGeoJSON.eachLayer block that was here — it
+// referenced drawnPolygon and selectedCities which don't exist at this
+// scope, causing a ReferenceError that crashed the entire script on load.
 // --------------------------------------------------
 // EPA MONITORS
 // --------------------------------------------------
@@ -148,10 +136,10 @@ let epaGeoJSON = L.geoJSON(null, {
 }).addTo(epaLayer);
 async function loadEPAMonitorsInView() {
     const b = map.getBounds();
-    const { bdate, edate } = dateSliderControl.getDates();  // ← pull from slider
+    const { bdate, edate } = dateSliderControl.getDates();
 
     const url = `https://aqs.epa.gov/data/api/monitors/byBox?email=${EPA_EMAIL}&key=${EPA_KEY}`
-        + `&param=${PARAM}&bdate=${bdate}&edate=${edate}`   // ← use them here
+        + `&param=${PARAM}&bdate=${bdate}&edate=${edate}`
         + `&minlat=${b.getSouth()}&maxlat=${b.getNorth()}`
         + `&minlon=${b.getWest()}&maxlon=${b.getEast()}`;
 
@@ -175,7 +163,6 @@ function triggerMonitorLoad(){
     monitorTimeout = setTimeout(loadEPAMonitorsInView, 400);
 }
 map.on('moveend', triggerMonitorLoad);
-loadEPAMonitorsInView(); // first load
 // --------------------------------------------------
 // DRAW CONTROL
 // --------------------------------------------------
@@ -196,25 +183,20 @@ map.on(L.Draw.Event.CREATED, async function (event) {
     let selectedMonitors = [];
     let statesTouched = [];
 
-    // Reset state styles first
     statesGeoJSON.eachLayer(resetStateStyle);
 
     // ---------------- Cities ----------------
     citiesGeoJSON.eachLayer(l => {
         const type = l.feature.properties.Type;
         const inside = turf.booleanPointInPolygon(l.toGeoJSON(), drawnPolygon);
-
         l.setStyle(cityStyle(type, inside));
-
         if (inside) selectedCities.push(l.feature.properties.Municipality);
     });
 
     // ---------------- Monitors ----------------
     epaGeoJSON.eachLayer(l => {
         const inside = turf.booleanPointInPolygon(l.toGeoJSON(), drawnPolygon);
-
         l.setStyle(monitorStyle(inside));
-
         if (inside) selectedMonitors.push(l.feature.properties.site);
     });
 
@@ -226,7 +208,7 @@ map.on(L.Draw.Event.CREATED, async function (event) {
         }
     });
 
-    // ---------- Immediate summary (fast feedback) ----------
+    // Immediate feedback while async calls run
     summaryControl.setContent(`
         <b>Selection Summary</b><br>
         States: ${statesTouched.length}<br>
@@ -235,31 +217,35 @@ map.on(L.Draw.Event.CREATED, async function (event) {
         Calculating nighttime lights & AI summary...
     `);
 
-    // ---------------- Nighttime Lights ----------------
-    const ntl = await fetch(`${BACKEND}/ntlSummary`, {
-        method: "POST",
-        body: JSON.stringify(drawnPolygon),
-        headers: { "Content-Type": "application/json" }
-    }).then(r => r.json());
+    // FIX: wrapped both fetch calls in try/catch so errors surface in the UI
+    try {
+        // ---------------- Nighttime Lights ----------------
+        const ntl = await fetch(`${BACKEND}/ntlSummary`, {
+            method: "POST",
+            body: JSON.stringify(drawnPolygon),
+            headers: { "Content-Type": "application/json" }
+        }).then(r => r.json());
 
-    // ---------------- AI Summary ----------------
-    const aiSummary = await fetch(`${BACKEND}/aiSummary`, {
-        method: "POST",
-        body: JSON.stringify({
-            cities: selectedCities,
-            monitors: selectedMonitors,
-            states: statesTouched,
-            ntlStats: ntl
-        }),
-        headers: { "Content-Type": "application/json" }
-    }).then(r => r.text());
+        // ---------------- AI Summary ----------------
+        const aiSummary = await fetch(`${BACKEND}/aiSummary`, {
+            method: "POST",
+            body: JSON.stringify({
+                cities: selectedCities,
+                monitors: selectedMonitors,
+                states: statesTouched,
+                ntlStats: ntl
+            }),
+            headers: { "Content-Type": "application/json" }
+        }).then(r => r.text());
 
-    // ---------- Final summary ----------
-    summaryControl.setContent(aiSummary);
+        summaryControl.setContent(aiSummary);
+
+    } catch (err) {
+        summaryControl.setContent(`<b>Error generating summary:</b><br>${err.message}`);
+    }
 });
-
 // --------------------------------------------------
-// SUMMARY CONTROL (bottom-right)
+// SUMMARY CONTROL (bottom-left)
 // --------------------------------------------------
 const SummaryControl = L.Control.extend({
     options: { position: 'bottomleft' },
@@ -275,7 +261,7 @@ const SummaryControl = L.Control.extend({
     }
 });
 // --------------------------------------------------
-// STATE INFO CONTROL (bottom-left)
+// STATE INFO CONTROL (bottom-right)
 // --------------------------------------------------
 const StateInfoControl = L.Control.extend({
     options: { position: 'bottomright' },
@@ -283,8 +269,6 @@ const StateInfoControl = L.Control.extend({
     onAdd: function () {
         this._div = L.DomUtil.create('div', 'stateinfo-box');
         this._div.innerHTML = '<b>State Info</b><br>Click a state.';
-
-        // Prevent map clicks from bleeding through the control
         L.DomEvent.disableClickPropagation(this._div);
         return this._div;
     },
@@ -297,8 +281,8 @@ const StateInfoControl = L.Control.extend({
         this._div.querySelector('.stateinfo-close')
             .addEventListener('click', () => {
                 this._div.innerHTML = '<b>State Info</b><br>Click a state.';
-            map.setView([36.99914216255409, -109.04537518899879], 6);
-        });
+                map.setView([36.99914216255409, -109.04537518899879], 6);
+            });
     }
 });
 
@@ -326,7 +310,6 @@ const DateSliderControl = L.Control.extend({
         L.DomEvent.disableClickPropagation(this._div);
         L.DomEvent.disableScrollPropagation(this._div);
 
-        // Build 12 months from Jan 2020 – Dec 2024 (adjust range as needed)
         this._months = [];
         for (let y = 2020; y <= 2024; y++) {
             for (let m = 1; m <= 12; m++) {
@@ -335,65 +318,68 @@ const DateSliderControl = L.Control.extend({
         }
 
         const max = this._months.length - 1;
-        this._startIdx = 0;         // default: Jan 2020
-        this._endIdx   = max;       // default: Dec 2024
+        this._startIdx = 0;
+        this._endIdx   = max;
 
         this._div.innerHTML = `
             <b>Date Range</b>
-            <label>Start</label>
-            <input type="range" id="sliderStart" min="0" max="${max}" value="${this._startIdx}">
-            <div class="date-display" id="displayStart"></div>
-            <label>End</label>
-            <input type="range" id="sliderEnd" min="0" max="${max}" value="${this._endIdx}">
-            <div class="date-display" id="displayEnd"></div>
+            <div class="slider-track-wrapper">
+                <div class="slider-rail"></div>
+                <div class="slider-fill" id="sliderFill"></div>
+                <input type="range" id="sliderStart" min="0" max="${max}" value="${this._startIdx}">
+                <input type="range" id="sliderEnd"   min="0" max="${max}" value="${this._endIdx}">
+            </div>
+            <div class="date-display">
+                <span id="displayStart"></span>
+                <span id="displayEnd"></span>
+            </div>
         `;
 
-        // Wire up sliders after insertion
         setTimeout(() => {
-            const sliderStart   = document.getElementById('sliderStart');
-            const sliderEnd     = document.getElementById('sliderEnd');
-            const displayStart  = document.getElementById('displayStart');
-            const displayEnd    = document.getElementById('displayEnd');
+            const sliderStart  = document.getElementById('sliderStart');
+            const sliderEnd    = document.getElementById('sliderEnd');
+            const displayStart = document.getElementById('displayStart');
+            const displayEnd   = document.getElementById('displayEnd');
+            const fill         = document.getElementById('sliderFill');
 
             const fmt = idx => {
                 const { year, month } = this._months[idx];
-                return `${year}-${String(month).padStart(2,'0')}`;
+                return `${year}-${String(month).padStart(2, '0')}`;
             };
 
             const update = () => {
-                // Clamp so start never exceeds end
-                if (+sliderStart.value > +sliderEnd.value) {
-                    sliderStart.value = sliderEnd.value;
-                }
-                if (+sliderEnd.value < +sliderStart.value) {
-                    sliderEnd.value = sliderStart.value;
-                }
+                let s = +sliderStart.value;
+                let e = +sliderEnd.value;
 
-                this._startIdx = +sliderStart.value;
-                this._endIdx   = +sliderEnd.value;
+                if (s > e) sliderStart.value = s = e;
+                if (e < s) sliderEnd.value   = e = s;
 
-                displayStart.textContent = fmt(this._startIdx);
-                displayEnd.textContent   = fmt(this._endIdx);
+                this._startIdx = s;
+                this._endIdx   = e;
 
-                triggerMonitorLoad(); // reload EPA data with new dates
+                const pct = v => (v / max) * 100;
+                fill.style.left  = `${pct(s)}%`;
+                fill.style.width = `${pct(e) - pct(s)}%`;
+
+                displayStart.textContent = fmt(s);
+                displayEnd.textContent   = fmt(e);
+
+                triggerMonitorLoad();
             };
 
             sliderStart.addEventListener('input', update);
             sliderEnd.addEventListener('input', update);
-            update(); // init display
+            update();
         }, 0);
 
         return this._div;
     },
 
-    // Returns { bdate: "YYYYMMDD", edate: "YYYYMMDD" }
     getDates: function () {
         const s = this._months[this._startIdx];
         const e = this._months[this._endIdx];
 
         const bdate = `${s.year}${String(s.month).padStart(2,'0')}01`;
-
-        // Last day of end month
         const lastDay = new Date(e.year, e.month, 0).getDate();
         const edate   = `${e.year}${String(e.month).padStart(2,'0')}${lastDay}`;
 
@@ -401,5 +387,9 @@ const DateSliderControl = L.Control.extend({
     }
 });
 
+// FIX: dateSliderControl instantiated BEFORE loadEPAMonitorsInView() is
+// called for the first time, so getDates() is available when first needed.
 const dateSliderControl = new DateSliderControl();
 map.addControl(dateSliderControl);
+
+loadEPAMonitorsInView(); // first load — now safe to call
