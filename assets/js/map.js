@@ -57,7 +57,7 @@ function resetStateStyle(layer){
     layer.setStyle({ color:'gold', weight:2, fillOpacity:0.1 });
 }
 // --------------------------------------------------
-// GEE NIGHT LIGHTS (tile layer goes on MAP)
+// GEE NIGHT LIGHTS
 // --------------------------------------------------
 const nightLightsLayer = L.tileLayer(
     `https://earthengine.googleapis.com/v1/projects/ryer7052-ee/maps/88f1faba04b54bc4f3f579f64f8e8a80-67858b1b15d58980236c45e2740dd9b6/tiles/{z}/{x}/{y}`,
@@ -104,14 +104,17 @@ statesGeoJSON = new L.GeoJSON.AJAX("/data/geojson/rerickson_2018_us_state_500k.g
             className: "state-label"
         });
 
-        // --- POPUP ---
-        layer.bindPopup(
-            `<center><b>${feature.properties.alt_title}</b></center><br><br>
-             <img src="${feature.properties.image}" style="width:100%;max-width:200px;display:block;margin:8px auto;"><br>
-             ${feature.properties.description}`
-        );
+        layer.on("click", () => {
 
-        layer.on("click", () => map.fitBounds(layer.getBounds()));
+            map.fitBounds(layer.getBounds());
+
+            stateInfoControl.setContent(`
+                <b>${feature.properties.alt_title}</b><br>
+                <img src="${feature.properties.image}" 
+                    style="width:100%;max-width:240px;margin:8px 0;"><br>
+                ${feature.properties.description || ""}
+            `);
+        });
     }
 }).addTo(statesLayer);
 // --------------------------------------------------
@@ -145,9 +148,10 @@ let epaGeoJSON = L.geoJSON(null, {
 }).addTo(epaLayer);
 async function loadEPAMonitorsInView() {
     const b = map.getBounds();
+    const { bdate, edate } = dateSliderControl.getDates();  // ← pull from slider
 
     const url = `https://aqs.epa.gov/data/api/monitors/byBox?email=${EPA_EMAIL}&key=${EPA_KEY}`
-        + `&param=${PARAM}&bdate=20231201&edate=20231231`
+        + `&param=${PARAM}&bdate=${bdate}&edate=${edate}`   // ← use them here
         + `&minlat=${b.getSouth()}&maxlat=${b.getNorth()}`
         + `&minlon=${b.getWest()}&maxlon=${b.getEast()}`;
 
@@ -156,13 +160,10 @@ async function loadEPAMonitorsInView() {
     if (!json.Data) return;
 
     epaGeoJSON.clearLayers();
-
     epaGeoJSON.addData(json.Data.map(m => ({
         type: "Feature",
-        geometry: { type: "Point", coordinates: [+m.longitude, +m.latitude] }, 
-        properties: {
-            site: `${m.state_code}-${m.county_code}-${m.site_number}`    //add more monitor content here
-        }
+        geometry: { type: "Point", coordinates: [+m.longitude, +m.latitude] },
+        properties: { site: `${m.state_code}-${m.county_code}-${m.site_number}` }
     })));
 }
 // --------------------------------------------------
@@ -198,35 +199,51 @@ map.on(L.Draw.Event.CREATED, async function (event) {
     // Reset state styles first
     statesGeoJSON.eachLayer(resetStateStyle);
 
-    // Cities
-    citiesGeoJSON.eachLayer(l=>{
-        let inside = turf.booleanPointInPolygon(l.toGeoJSON(), drawnPolygon);
-        l.setStyle(cityStyle(inside));
-        if(inside) selectedCities.push(l.feature.properties.Municipality);
+    // ---------------- Cities ----------------
+    citiesGeoJSON.eachLayer(l => {
+        const type = l.feature.properties.Type;
+        const inside = turf.booleanPointInPolygon(l.toGeoJSON(), drawnPolygon);
+
+        l.setStyle(cityStyle(type, inside));
+
+        if (inside) selectedCities.push(l.feature.properties.Municipality);
     });
 
-    // Monitors
-    epaGeoJSON.eachLayer(l=>{
-        let inside = turf.booleanPointInPolygon(l.toGeoJSON(), drawnPolygon);
+    // ---------------- Monitors ----------------
+    epaGeoJSON.eachLayer(l => {
+        const inside = turf.booleanPointInPolygon(l.toGeoJSON(), drawnPolygon);
+
         l.setStyle(monitorStyle(inside));
-        if(inside) selectedMonitors.push(l.feature.properties.site);
+
+        if (inside) selectedMonitors.push(l.feature.properties.site);
     });
 
-    // States
-    statesGeoJSON.eachLayer(l=>{
-        if(turf.booleanIntersects(l.toGeoJSON(), drawnPolygon)){
-            l.setStyle({fillColor:'orange', fillOpacity:0.3});
+    // ---------------- States ----------------
+    statesGeoJSON.eachLayer(l => {
+        if (turf.booleanIntersects(l.toGeoJSON(), drawnPolygon)) {
+            l.setStyle({ fillColor: 'orange', fillOpacity: 0.3 });
             statesTouched.push(l.feature.properties.alt_title);
         }
     });
 
-    let ntl = await fetch(`${BACKEND}/ntlSummary`, {
+    // ---------- Immediate summary (fast feedback) ----------
+    summaryControl.setContent(`
+        <b>Selection Summary</b><br>
+        States: ${statesTouched.length}<br>
+        Cities: ${selectedCities.length}<br>
+        Monitors: ${selectedMonitors.length}<br>
+        Calculating nighttime lights & AI summary...
+    `);
+
+    // ---------------- Nighttime Lights ----------------
+    const ntl = await fetch(`${BACKEND}/ntlSummary`, {
         method: "POST",
         body: JSON.stringify(drawnPolygon),
-        headers: { "Content-Type": "ai_engine/application/json" }
+        headers: { "Content-Type": "application/json" }
     }).then(r => r.json());
 
-    let aiSummary = await fetch(`${BACKEND}/aiSummary`, {
+    // ---------------- AI Summary ----------------
+    const aiSummary = await fetch(`${BACKEND}/aiSummary`, {
         method: "POST",
         body: JSON.stringify({
             cities: selectedCities,
@@ -234,14 +251,61 @@ map.on(L.Draw.Event.CREATED, async function (event) {
             states: statesTouched,
             ntlStats: ntl
         }),
-        headers: { "Content-Type": "ai_engine/application/json" }
+        headers: { "Content-Type": "application/json" }
     }).then(r => r.text());
 
-    L.popup()
-        .setLatLng(event.layer.getBounds().getCenter())
-        .setContent(aiSummary)
-        .openOn(map);
+    // ---------- Final summary ----------
+    summaryControl.setContent(aiSummary);
 });
+
+// --------------------------------------------------
+// SUMMARY CONTROL (bottom-right)
+// --------------------------------------------------
+const SummaryControl = L.Control.extend({
+    options: { position: 'bottomleft' },
+
+    onAdd: function () {
+        this._div = L.DomUtil.create('div', 'summary-box');
+        this._div.innerHTML = '<b>AOI Summary</b><br>Draw a polygon to get started!';
+        return this._div;
+    },
+
+    setContent: function (html) {
+        this._div.innerHTML = html;
+    }
+});
+// --------------------------------------------------
+// STATE INFO CONTROL (bottom-left)
+// --------------------------------------------------
+const StateInfoControl = L.Control.extend({
+    options: { position: 'bottomright' },
+
+    onAdd: function () {
+        this._div = L.DomUtil.create('div', 'stateinfo-box');
+        this._div.innerHTML = '<b>State Info</b><br>Click a state.';
+
+        // Prevent map clicks from bleeding through the control
+        L.DomEvent.disableClickPropagation(this._div);
+        return this._div;
+    },
+
+    setContent: function (html) {
+        this._div.innerHTML = `
+            <span class="stateinfo-close" title="Close">&times;</span>
+            ${html}
+        `;
+        this._div.querySelector('.stateinfo-close')
+            .addEventListener('click', () => {
+                this._div.innerHTML = '<b>State Info</b><br>Click a state.';
+            map.setView([36.99914216255409, -109.04537518899879], 6);
+        });
+    }
+});
+
+const stateInfoControl = new StateInfoControl();
+map.addControl(stateInfoControl);
+const summaryControl = new SummaryControl();
+map.addControl(summaryControl);
 // --------------------------------------------------
 // LAYER CONTROL
 // --------------------------------------------------
@@ -251,3 +315,91 @@ L.control.layers(null, {
     "EPA Monitors": epaLayer,
     "Nighttime Lights": nightLightsLayer
 }).addTo(map);
+// --------------------------------------------------
+// DATE SLIDER CONTROL
+// --------------------------------------------------
+const DateSliderControl = L.Control.extend({
+    options: { position: 'topright' },
+
+    onAdd: function () {
+        this._div = L.DomUtil.create('div', 'date-slider-box leaflet-bar');
+        L.DomEvent.disableClickPropagation(this._div);
+        L.DomEvent.disableScrollPropagation(this._div);
+
+        // Build 12 months from Jan 2020 – Dec 2024 (adjust range as needed)
+        this._months = [];
+        for (let y = 2020; y <= 2024; y++) {
+            for (let m = 1; m <= 12; m++) {
+                this._months.push({ year: y, month: m });
+            }
+        }
+
+        const max = this._months.length - 1;
+        this._startIdx = 0;         // default: Jan 2020
+        this._endIdx   = max;       // default: Dec 2024
+
+        this._div.innerHTML = `
+            <b>Date Range</b>
+            <label>Start</label>
+            <input type="range" id="sliderStart" min="0" max="${max}" value="${this._startIdx}">
+            <div class="date-display" id="displayStart"></div>
+            <label>End</label>
+            <input type="range" id="sliderEnd" min="0" max="${max}" value="${this._endIdx}">
+            <div class="date-display" id="displayEnd"></div>
+        `;
+
+        // Wire up sliders after insertion
+        setTimeout(() => {
+            const sliderStart   = document.getElementById('sliderStart');
+            const sliderEnd     = document.getElementById('sliderEnd');
+            const displayStart  = document.getElementById('displayStart');
+            const displayEnd    = document.getElementById('displayEnd');
+
+            const fmt = idx => {
+                const { year, month } = this._months[idx];
+                return `${year}-${String(month).padStart(2,'0')}`;
+            };
+
+            const update = () => {
+                // Clamp so start never exceeds end
+                if (+sliderStart.value > +sliderEnd.value) {
+                    sliderStart.value = sliderEnd.value;
+                }
+                if (+sliderEnd.value < +sliderStart.value) {
+                    sliderEnd.value = sliderStart.value;
+                }
+
+                this._startIdx = +sliderStart.value;
+                this._endIdx   = +sliderEnd.value;
+
+                displayStart.textContent = fmt(this._startIdx);
+                displayEnd.textContent   = fmt(this._endIdx);
+
+                triggerMonitorLoad(); // reload EPA data with new dates
+            };
+
+            sliderStart.addEventListener('input', update);
+            sliderEnd.addEventListener('input', update);
+            update(); // init display
+        }, 0);
+
+        return this._div;
+    },
+
+    // Returns { bdate: "YYYYMMDD", edate: "YYYYMMDD" }
+    getDates: function () {
+        const s = this._months[this._startIdx];
+        const e = this._months[this._endIdx];
+
+        const bdate = `${s.year}${String(s.month).padStart(2,'0')}01`;
+
+        // Last day of end month
+        const lastDay = new Date(e.year, e.month, 0).getDate();
+        const edate   = `${e.year}${String(e.month).padStart(2,'0')}${lastDay}`;
+
+        return { bdate, edate };
+    }
+});
+
+const dateSliderControl = new DateSliderControl();
+map.addControl(dateSliderControl);

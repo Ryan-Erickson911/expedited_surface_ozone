@@ -2155,8 +2155,67 @@ input, select, textarea {
 		font-size: 14px;
 		text-shadow: 0 0 4px black;
 	}
-/* Large */
 
+	.summary-box {
+		width: 320px;
+		max-height: 260px;
+		overflow-y: auto;
+		background: white;
+		padding: 12px;
+		border-radius: 8px;
+		box-shadow: 0 0 10px rgba(0,0,0,0.35);
+		font-size: 14px;
+		line-height: 1.4;
+		opacity: 0.8;
+	}
+
+	.stateinfo-box {
+		width: 320px;
+		max-height: 400px;
+		overflow-y: auto;
+		background: white;
+		padding: 12px;
+		border-radius: 8px;
+		box-shadow: 0 0 10px rgba(0,0,0,0.35);
+		font-size: 14px;
+		line-height: 1.4;
+		opacity: 0.8;
+	}
+	.stateinfo-close {
+		float: right;
+		cursor: pointer;
+		font-size: 18px;
+		line-height: 1;
+		color: #555;
+		margin-left: 8px;
+	}
+	.stateinfo-close:hover {
+		color: #000;
+	}
+	/* Large */
+	.date-slider-box {
+		background: white;
+		padding: 8px 10px;
+		border-radius: 4px;
+		font-size: 12px;
+		line-height: 1.6;
+		min-width: 200px;
+	}
+	.date-slider-box label {
+		display: block;
+		margin-top: 6px;
+		font-weight: bold;
+	}
+	.date-slider-box input[type="range"] {
+		width: 100%;
+		cursor: pointer;
+	}
+	.date-slider-box .date-display {
+		text-align: center;
+		font-size: 11px;
+		color: #333;
+		margin-top: 2px;
+	}
 	@media screen and (max-width: 1280px) {
 
 		/* Basic */
