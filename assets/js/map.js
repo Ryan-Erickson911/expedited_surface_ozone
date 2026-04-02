@@ -212,19 +212,19 @@ map.on(L.Draw.Event.CREATED, async function (event) {
         <b>Selection Summary</b><br>
         States: ${statesTouched.length}<br>
         Cities: ${selectedCities.length}<br>
-        Monitors: ${selectedMonitors.length}<br>
-        Calculating nighttime lights & AI summary...
+        Monitors: ${selectedMonitors.length}<br><br>
+        <b>Summarizing Points...</b><br>
     `);
-    
+
     try {
-        // ---------------- Nighttime Lights ----------------
+        // Nighttime Lights
         const ntl = await fetch(`${BACKEND}/ntlSummary`, {
             method: "POST",
             body: JSON.stringify(drawnPolygon),
             headers: { "Content-Type": "application/json" }
         }).then(r => r.json());
 
-        // ---------------- AI Summary ----------------
+        // AI Summary
         const aiSummary = await fetch(`${BACKEND}/aiSummary`, {
             method: "POST",
             body: JSON.stringify({
@@ -236,10 +236,11 @@ map.on(L.Draw.Event.CREATED, async function (event) {
             headers: { "Content-Type": "application/json" }
         }).then(r => r.text());
 
-        summaryControl.setContent(aiSummary);
+        // Append instead of replace
+        summaryControl.appendContent(`<br><br>${aiSummary}`);
 
     } catch (err) {
-        summaryControl.setContent(`<b>Error generating summary:</b><br>${err.message}`);
+        summaryControl.appendContent(`<b>Error generating summary:</b><br>${err.message}`);
     }
 });
 // --------------------------------------------------
@@ -256,6 +257,10 @@ const SummaryControl = L.Control.extend({
 
     setContent: function (html) {
         this._div.innerHTML = html;
+    },
+
+    appendContent: function (html) {
+        this._div.innerHTML += html;
     }
 });
 // --------------------------------------------------
@@ -385,8 +390,6 @@ const DateSliderControl = L.Control.extend({
     }
 });
 
-// FIX: dateSliderControl instantiated BEFORE loadEPAMonitorsInView() is
-// called for the first time, so getDates() is available when first needed.
 const dateSliderControl = new DateSliderControl();
 map.addControl(dateSliderControl);
 
