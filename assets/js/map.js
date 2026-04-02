@@ -60,7 +60,7 @@ function resetStateStyle(layer){
 // GEE NIGHT LIGHTS
 // --------------------------------------------------
 const nightLightsLayer = L.tileLayer(
-    `https://earthengine.googleapis.com/v1/projects/ryer7052-ee/maps/88f1faba04b54bc4f3f579f64f8e8a80-67858b1b15d58980236c45e2740dd9b6/tiles/{z}/{x}/{y}`,
+    `https://earthengine.googleapis.com/v1/projects/newapp-683f4/maps/88f1faba04b54bc4f3f579f64f8e8a80-99d2609d8c7b6f993856bb2ecc6f027d/tiles/{z}/{x}/{y}`,
     { attribution: "GEE | VIIRS Nighttime Lights", opacity: 1 }
 );
 nightLightsLayer.addTo(map);
