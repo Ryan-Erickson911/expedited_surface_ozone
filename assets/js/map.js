@@ -1,7 +1,7 @@
 // --------------------------------------------------
 // MAP SETUP
 // --------------------------------------------------
-const BACKEND = "https://739mb0wj4b.execute-api.us-west-2.amazonaws.com";
+const BACKEND = "https://739mb0wj4b.execute-api.us-west-2.amazonaws.com/default";
 const map = L.map('map', {
     center: [36.99914216255409, -109.04537518899879],
     zoom: 6
@@ -67,8 +67,7 @@ nightLightsLayer.addTo(map);
 // --------------------------------------------------
 // STATES
 // --------------------------------------------------
-let statesGeoJSON;
-statesGeoJSON = new L.GeoJSON.AJAX("/assets/data/geojson/rerickson_2018_us_state_500k.geojson", {
+let statesGeoJSON = new L.GeoJSON.AJAX("assets/data/geojson/rerickson_2018_us_state_500k.geojson", {
     style: { color: 'gold', weight: 2, fillOpacity: 0.1 },
 
     onEachFeature: (feature, layer) => {
@@ -111,7 +110,7 @@ statesGeoJSON = new L.GeoJSON.AJAX("/assets/data/geojson/rerickson_2018_us_state
 // --------------------------------------------------
 // US CITIES
 // --------------------------------------------------
-let citiesGeoJSON = new L.GeoJSON.AJAX("/assets/data/geojson/usa_major_cities.geojson", {
+let citiesGeoJSON = new L.GeoJSON.AJAX("assets/data/geojson/usa_major_cities.geojson", {
     pointToLayer: (f, latlng) =>
         L.circleMarker(latlng, cityStyle(f.properties.Type)),
     onEachFeature: (f, layer) =>
@@ -216,8 +215,7 @@ map.on(L.Draw.Event.CREATED, async function (event) {
         Monitors: ${selectedMonitors.length}<br>
         Calculating nighttime lights & AI summary...
     `);
-
-    // FIX: wrapped both fetch calls in try/catch so errors surface in the UI
+    
     try {
         // ---------------- Nighttime Lights ----------------
         const ntl = await fetch(`${BACKEND}/ntlSummary`, {
