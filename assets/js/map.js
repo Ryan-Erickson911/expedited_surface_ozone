@@ -68,7 +68,7 @@ nightLightsLayer.addTo(map);
 // STATES
 // --------------------------------------------------
 let statesGeoJSON;
-statesGeoJSON = new L.GeoJSON.AJAX("/data/geojson/rerickson_2018_us_state_500k.geojson", {
+statesGeoJSON = new L.GeoJSON.AJAX("/assets/data/geojson/rerickson_2018_us_state_500k.geojson", {
     style: { color: 'gold', weight: 2, fillOpacity: 0.1 },
 
     onEachFeature: (feature, layer) => {
@@ -111,7 +111,7 @@ statesGeoJSON = new L.GeoJSON.AJAX("/data/geojson/rerickson_2018_us_state_500k.g
 // --------------------------------------------------
 // US CITIES
 // --------------------------------------------------
-let citiesGeoJSON = new L.GeoJSON.AJAX("/data/geojson/usa_major_cities.geojson", {
+let citiesGeoJSON = new L.GeoJSON.AJAX("/assets/data/geojson/usa_major_cities.geojson", {
     pointToLayer: (f, latlng) =>
         L.circleMarker(latlng, cityStyle(f.properties.Type)),
     onEachFeature: (f, layer) =>
