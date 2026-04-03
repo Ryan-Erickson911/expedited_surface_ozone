@@ -120,9 +120,7 @@ let citiesGeoJSON = new L.GeoJSON.AJAX("assets/data/geojson/usa_major_cities.geo
             Type: ${f.properties.Type}
         `)
 }).addTo(citiesLayer);
-// NOTE: Removed stray citiesGeoJSON.eachLayer block that was here — it
-// referenced drawnPolygon and selectedCities which don't exist at this
-// scope, causing a ReferenceError that crashed the entire script on load.
+
 // --------------------------------------------------
 // EPA MONITORS
 // --------------------------------------------------
@@ -153,6 +151,7 @@ async function loadEPAMonitorsInView() {
         properties: { site: `${m.state_code}-${m.county_code}-${m.site_number}` }
     })));
 }
+
 // --------------------------------------------------
 // AUTO LOAD + THROTTLE
 // --------------------------------------------------
@@ -162,6 +161,7 @@ function triggerMonitorLoad(){
     monitorTimeout = setTimeout(loadEPAMonitorsInView, 400);
 }
 map.on('moveend', triggerMonitorLoad);
+
 // --------------------------------------------------
 // DRAW CONTROL
 // --------------------------------------------------
@@ -169,6 +169,7 @@ map.addControl(new L.Control.Draw({
     edit: { featureGroup: drawnItems },
     draw: { polygon: true, polyline:false, rectangle:false, circle:false, marker:false }
 }));
+
 // --------------------------------------------------
 // DRAW ANALYSIS
 // --------------------------------------------------
@@ -206,7 +207,6 @@ map.on(L.Draw.Event.CREATED, async function (event) {
             statesTouched.push(l.feature.properties.alt_title);
         }
     });
-    console.log(JSON.stringify(drawnPolygon.geometry))
     // Immediate feedback while async calls run
     summaryControl.setContent(`
         <b>Selection Summary</b><br>
@@ -224,6 +224,7 @@ map.on(L.Draw.Event.CREATED, async function (event) {
             headers: { "Content-Type": "application/json" }
         }).then(r => r.json()); // this should return the mean valute of ntl in the polygon
 
+        console.log(ntl)
         // AI Summary
         let aiSummary = await fetch(`${BACKEND}/aiSummary`, {
             method: "POST",
@@ -243,6 +244,7 @@ map.on(L.Draw.Event.CREATED, async function (event) {
         summaryControl.appendContent(`<b>Error generating summary:</b><br>${err.message}`);
     }
 });
+
 // --------------------------------------------------
 // SUMMARY CONTROL (bottom-left)
 // --------------------------------------------------
@@ -263,6 +265,7 @@ const SummaryControl = L.Control.extend({
         this._div.innerHTML += html;
     }
 });
+
 // --------------------------------------------------
 // STATE INFO CONTROL (bottom-right)
 // --------------------------------------------------
@@ -290,8 +293,8 @@ const StateInfoControl = L.Control.extend({
 });
 
 const stateInfoControl = new StateInfoControl();
-map.addControl(stateInfoControl);
 const summaryControl = new SummaryControl();
+map.addControl(stateInfoControl);
 map.addControl(summaryControl);
 // --------------------------------------------------
 // LAYER CONTROL
