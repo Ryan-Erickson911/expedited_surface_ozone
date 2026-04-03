@@ -206,7 +206,7 @@ map.on(L.Draw.Event.CREATED, async function (event) {
             statesTouched.push(l.feature.properties.alt_title);
         }
     });
-
+    console.log(JSON.stringify(drawnPolygon.geometry))
     // Immediate feedback while async calls run
     summaryControl.setContent(`
         <b>Selection Summary</b><br>
@@ -220,9 +220,9 @@ map.on(L.Draw.Event.CREATED, async function (event) {
         // Nighttime Lights
         const ntl = await fetch(`${BACKEND}/ntlSummary`, {
             method: "POST",
-            body: JSON.stringify(drawnPolygon),
+            body: JSON.stringify(drawnPolygon.geometry),
             headers: { "Content-Type": "application/json" }
-        }).then(r => r.json());
+        }).then(r => r.json()); // this should return the mean valute of ntl in the polygon
 
         // AI Summary
         const aiSummary = await fetch(`${BACKEND}/aiSummary`, {
