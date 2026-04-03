@@ -218,14 +218,14 @@ map.on(L.Draw.Event.CREATED, async function (event) {
 
     try {
         // Nighttime Lights
-        const ntl = await fetch(`${BACKEND}/ntlSummary`, {
+        let ntl = await fetch(`${BACKEND}/ntlSummary`, {
             method: "POST",
             body: JSON.stringify(drawnPolygon.geometry),
             headers: { "Content-Type": "application/json" }
         }).then(r => r.json()); // this should return the mean valute of ntl in the polygon
 
         // AI Summary
-        const aiSummary = await fetch(`${BACKEND}/aiSummary`, {
+        let aiSummary = await fetch(`${BACKEND}/aiSummary`, {
             method: "POST",
             body: JSON.stringify({
                 cities: selectedCities,
