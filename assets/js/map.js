@@ -131,6 +131,7 @@ let epaGeoJSON = L.geoJSON(null, {
         layer.bindPopup(`Monitor: ${feature.properties.site}`);
     }
 }).addTo(epaLayer);
+
 async function loadEPAMonitorsInView() {
     const b = map.getBounds();
     const { bdate, edate } = dateSliderControl.getDates();
@@ -156,10 +157,12 @@ async function loadEPAMonitorsInView() {
 // AUTO LOAD + THROTTLE
 // --------------------------------------------------
 let monitorTimeout;
+
 function triggerMonitorLoad(){
     clearTimeout(monitorTimeout);
     monitorTimeout = setTimeout(loadEPAMonitorsInView, 400);
 }
+
 map.on('moveend', triggerMonitorLoad);
 
 // --------------------------------------------------
