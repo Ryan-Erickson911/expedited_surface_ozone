@@ -228,7 +228,8 @@ map.on(L.Draw.Event.CREATED, async function (event) {
             headers: { "Content-Type": "application/json" }
         }).then(r => r.json()); // this should return the mean valute of ntl in the polygon
 
-        console.log("NTL RETURN" + ntl)
+        summaryControl.appendContent(`<br><br>${ntl}`);
+        console.log("NTL RETURN: " + ntl)
         // AI Summary
         var aiSummary = await fetch(`${BACKEND}/aiSummary`, {
             method: "POST",
@@ -240,7 +241,7 @@ map.on(L.Draw.Event.CREATED, async function (event) {
             }),
             headers: { "Content-Type": "application/json" }
         }).then(r => r.text());
-        console.log("AI SUMMARY RETURN" + aiSummary)
+        console.log("AI SUMMARY RETURN: " + aiSummary)
         // Append instead of replace
         summaryControl.appendContent(`<br><br>${aiSummary}`);
 
