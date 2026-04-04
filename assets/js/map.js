@@ -221,15 +221,16 @@ map.on(L.Draw.Event.CREATED, async function (event) {
 
     try {
         // Nighttime Lights
-        let ntl = await fetch(`${BACKEND}/ntlSummary`, {
+        console.log(JSON.stringify(drawnPolygon.geometry))
+        var ntl = await fetch(`${BACKEND}/ntlSummary`, {
             method: "POST",
             body: JSON.stringify(drawnPolygon.geometry),
             headers: { "Content-Type": "application/json" }
         }).then(r => r.json()); // this should return the mean valute of ntl in the polygon
 
-        console.log(ntl)
+        console.log("NTL RETURN" + ntl)
         // AI Summary
-        let aiSummary = await fetch(`${BACKEND}/aiSummary`, {
+        var aiSummary = await fetch(`${BACKEND}/aiSummary`, {
             method: "POST",
             body: JSON.stringify({
                 cities: selectedCities,
@@ -239,7 +240,7 @@ map.on(L.Draw.Event.CREATED, async function (event) {
             }),
             headers: { "Content-Type": "application/json" }
         }).then(r => r.text());
-
+        console.log("AI SUMMARY RETURN" + aiSummary)
         // Append instead of replace
         summaryControl.appendContent(`<br><br>${aiSummary}`);
 
