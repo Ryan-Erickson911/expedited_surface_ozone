@@ -241,14 +241,15 @@ async function loadEPAMonitorsInView() {
         geometry: { type: "Point", coordinates: [+m.longitude, +m.latitude] },
         properties: { site: `${m.state_code}-${m.county_code}-${m.site_number}` }
     })));
-}
+};
+loadEPAMonitorsInView(); 
 // AUTO LOAD + THROTTLE
 // -----------
 let monitorTimeout;
-function triggerMonitorLoad(){
+function triggerMonitorLoad() {
     clearTimeout(monitorTimeout);
     monitorTimeout = setTimeout(loadEPAMonitorsInView, 400);
-}
+}''
 map.on('moveend', triggerMonitorLoad);
 // --------------------------------------------------
 // DRAW CONTROL
@@ -329,17 +330,14 @@ map.on(L.Draw.Event.CREATED, async function (event) {
 // --------------------------------------------------
 const SummaryControl = L.Control.extend({
     options: { position: 'bottomleft' },
-
     onAdd: function () {
         this._div = L.DomUtil.create('div', 'summary-box');
         this._div.innerHTML = '<b>AOI Summary</b><br>Draw a polygon to get started!';
         return this._div;
     },
-
     setContent: function (html) {
         this._div.innerHTML = html;
     },
-
     appendContent: function (html) {
         this._div.innerHTML += html;
     }
@@ -382,4 +380,3 @@ L.control.layers(null, {
     "EPA Monitors": epaLayer,
     "Nighttime Lights": nightLightsLayer
 }).addTo(map);
-loadEPAMonitorsInView(); 

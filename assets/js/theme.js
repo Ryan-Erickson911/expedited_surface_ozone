@@ -8,9 +8,6 @@ const gitL = "assets/imgs/svgs/GitHubLight.webp";
 const gitD = "assets/imgs/svgs/GitHubDark.webp";
 const themeIcon = document.getElementById("doc-icon");
 const gitIcon = document.getElementById("gitIcon");
-const msidew = document.getElementById("mainSidebar");
-const toplogos = document.getElementById("logosandhome");
-const menuicon = document.getElementById("motionbutton");
 let movement = 1;
 
 function changeTheme() {
@@ -29,33 +26,3 @@ function changeTheme() {
     gitIcon.setAttribute("src", gitL);
   }
 }
-
-
-const contactheader = document.getElementById("contactheader");
-function hideheaders() {
-  var calcspace = document.body.offsetHeight - window.pageYOffset - document.getElementById("footer").offsetHeight - 153
-  let elms = document.querySelectorAll('[id="scrollheader"]');
-  if ((window.innerHeight + window.pageYOffset) >= document.body.offsetHeight+102-document.getElementById("footer").offsetHeight) {
-    contactheader.style.display = "block";
-    contactheader.style.height = calcspace+"px";
-    for(var i = 0; i < elms.length; i++)   
-      elms[i].style.top = "-100px";
-  } else if ((window.innerHeight + window.pageYOffset) >= document.body.offsetHeight-3) {    
-    contactheader.style.display = "block";
-    contactheader.style.height = calcspace+"px";
-    for(var i = 0; i < elms.length; i++)   
-      elms[i].style.top = "-100px";
-  } else {
-    contactheader.style.display = "none";
-    contactheader.style.height = "0px";
-    for(var i = 0; i < elms.length; i++)   
-      elms[i].style.top = "102px";
-  }
-
-}
-
-window.addEventListener("resize", checkmargins);
-window.addEventListener("scroll", checkmargins);
-window.addEventListener("resize", hideheaders);
-window.addEventListener("scroll", hideheaders);
-menuicon.onclick=NavControl;
