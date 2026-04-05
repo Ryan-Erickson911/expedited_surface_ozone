@@ -57,6 +57,84 @@ function resetStateStyle(layer){
     layer.setStyle({ color:'gold', weight:2, fillOpacity:0.1 });
 }
 // --------------------------------------------------
+// DATE SLIDER CONTROL
+// --------------------------------------------------
+const DateSliderControl = L.Control.extend({
+    options: { position: 'topright' },
+    onAdd: function () {
+        this._div = L.DomUtil.create('div', 'date-slider-box leaflet-bar');
+        L.DomEvent.disableClickPropagation(this._div);
+        L.DomEvent.disableScrollPropagation(this._div);
+        this._months = [];
+        for (let y = 2020; y <= 2024; y++) {
+            for (let m = 1; m <= 12; m++) {
+                this._months.push({ year: y, month: m });
+            }
+        }
+        const max = this._months.length - 1;
+        this._startIdx = 0;
+        this._endIdx   = max;
+        this._div.innerHTML = `
+            <b>Date Range</b>
+            <div class="slider-track-wrapper">
+                <div class="slider-rail"></div>
+                <div class="slider-fill" id="sliderFill"></div>
+                <input type="range" id="sliderStart" min="0" max="${max}" value="${this._startIdx}">
+                <input type="range" id="sliderEnd"   min="0" max="${max}" value="${this._endIdx}">
+            </div>
+            <div class="date-display">
+                <span id="displayStart"></span>
+                <span id="displayEnd"></span>
+            </div>
+        `;
+        setTimeout(() => {
+            const sliderStart  = document.getElementById('sliderStart');
+            const sliderEnd    = document.getElementById('sliderEnd');
+            const displayStart = document.getElementById('displayStart');
+            const displayEnd   = document.getElementById('displayEnd');
+            const fill         = document.getElementById('sliderFill');
+            const fmt = idx => {
+                const { year, month } = this._months[idx];
+                return `${year}-${String(month).padStart(2, '0')}`;
+            };
+            const update = () => {
+                let s = +sliderStart.value;
+                let e = +sliderEnd.value;
+
+                if (s > e) sliderStart.value = s = e;
+                if (e < s) sliderEnd.value   = e = s;
+
+                this._startIdx = s;
+                this._endIdx   = e;
+
+                const pct = v => (v / max) * 100;
+                fill.style.left  = `${pct(s)}%`;
+                fill.style.width = `${pct(e) - pct(s)}%`;
+
+                displayStart.textContent = fmt(s);
+                displayEnd.textContent   = fmt(e);
+
+                triggerMonitorLoad();
+            };
+            sliderStart.addEventListener('input', update);
+            sliderEnd.addEventListener('input', update);
+            update();
+        }, 0);
+        return this._div;
+    },
+    getDates: function () {
+        const s = this._months[this._startIdx];
+        const e = this._months[this._endIdx];
+
+        const bdate = `${s.year}${String(s.month).padStart(2,'0')}01`;
+        const lastDay = new Date(e.year, e.month, 0).getDate();
+        const edate   = `${e.year}${String(e.month).padStart(2,'0')}${lastDay}`;
+
+        return { bdate, edate };
+    }
+});
+const dateSliderControl = new DateSliderControl();
+// --------------------------------------------------
 // GEE NIGHT LIGHTS
 // --------------------------------------------------
 async function addNightLightsLayer() {
@@ -65,9 +143,7 @@ async function addNightLightsLayer() {
             method: "POST",
             headers: { "Content-Type": "application/json" }
         }).then(r => r.json());
-        const tileUrl = mapInfo.urlFormat
-            .replace("{mapid}", mapInfo.mapid)
-            .replace("{token}", mapInfo.token);
+        const tileUrl = mapInfo.urlFormat.replace("{mapid}", mapInfo.mapid).replace("{token}", mapInfo.token);
         const nightLightsLayer = L.tileLayer(tileUrl, {
             attribution: "GEE | VIIRS Nighttime Lights",
             opacity: 1
@@ -304,95 +380,6 @@ L.control.layers(null, {
     "EPA Monitors": epaLayer,
     "Nighttime Lights": nightLightsLayer
 }).addTo(map);
-// --------------------------------------------------
-// DATE SLIDER CONTROL
-// --------------------------------------------------
-const DateSliderControl = L.Control.extend({
-    options: { position: 'topright' },
-
-    onAdd: function () {
-        this._div = L.DomUtil.create('div', 'date-slider-box leaflet-bar');
-        L.DomEvent.disableClickPropagation(this._div);
-        L.DomEvent.disableScrollPropagation(this._div);
-
-        this._months = [];
-        for (let y = 2020; y <= 2024; y++) {
-            for (let m = 1; m <= 12; m++) {
-                this._months.push({ year: y, month: m });
-            }
-        }
-
-        const max = this._months.length - 1;
-        this._startIdx = 0;
-        this._endIdx   = max;
-
-        this._div.innerHTML = `
-            <b>Date Range</b>
-            <div class="slider-track-wrapper">
-                <div class="slider-rail"></div>
-                <div class="slider-fill" id="sliderFill"></div>
-                <input type="range" id="sliderStart" min="0" max="${max}" value="${this._startIdx}">
-                <input type="range" id="sliderEnd"   min="0" max="${max}" value="${this._endIdx}">
-            </div>
-            <div class="date-display">
-                <span id="displayStart"></span>
-                <span id="displayEnd"></span>
-            </div>
-        `;
-
-        setTimeout(() => {
-            const sliderStart  = document.getElementById('sliderStart');
-            const sliderEnd    = document.getElementById('sliderEnd');
-            const displayStart = document.getElementById('displayStart');
-            const displayEnd   = document.getElementById('displayEnd');
-            const fill         = document.getElementById('sliderFill');
-
-            const fmt = idx => {
-                const { year, month } = this._months[idx];
-                return `${year}-${String(month).padStart(2, '0')}`;
-            };
-
-            const update = () => {
-                let s = +sliderStart.value;
-                let e = +sliderEnd.value;
-
-                if (s > e) sliderStart.value = s = e;
-                if (e < s) sliderEnd.value   = e = s;
-
-                this._startIdx = s;
-                this._endIdx   = e;
-
-                const pct = v => (v / max) * 100;
-                fill.style.left  = `${pct(s)}%`;
-                fill.style.width = `${pct(e) - pct(s)}%`;
-
-                displayStart.textContent = fmt(s);
-                displayEnd.textContent   = fmt(e);
-
-                triggerMonitorLoad();
-            };
-
-            sliderStart.addEventListener('input', update);
-            sliderEnd.addEventListener('input', update);
-            update();
-        }, 0);
-
-        return this._div;
-    },
-
-    getDates: function () {
-        const s = this._months[this._startIdx];
-        const e = this._months[this._endIdx];
-
-        const bdate = `${s.year}${String(s.month).padStart(2,'0')}01`;
-        const lastDay = new Date(e.year, e.month, 0).getDate();
-        const edate   = `${e.year}${String(e.month).padStart(2,'0')}${lastDay}`;
-
-        return { bdate, edate };
-    }
-});
-
-const dateSliderControl = new DateSliderControl();
 map.addControl(dateSliderControl);
 
 loadEPAMonitorsInView(); 
