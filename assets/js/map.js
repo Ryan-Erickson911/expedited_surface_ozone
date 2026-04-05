@@ -64,7 +64,6 @@ const nightLightsLayer = L.tileLayer(
     { attribution: "GEE | VIIRS Nighttime Lights", opacity: 1 }
 );
 nightLightsLayer.addTo(map);
-
 // --------------------------------------------------
 // STATES
 // --------------------------------------------------
@@ -227,10 +226,10 @@ map.on(L.Draw.Event.CREATED, async function (event) {
             method: "POST",
             body: JSON.stringify(drawnPolygon.geometry),
             headers: { "Content-Type": "application/json" }
-        }).then(r => r.json()); // this should return the mean valute of ntl in the polygon
+        }).then(r => r.json()); 
 
-        summaryControl.appendContent(`<br><br>${ntl}`);
-        console.log("NTL RETURN: " + JSON.stringify(ntl))
+        var json_to_text = JSON.stringify(ntl)
+        summaryControl.appendContent(`<br><br>${json_to_text}`);
 
         // AI Summary
         var aiSummary = await fetch(`${BACKEND}/aiSummary`, {
@@ -239,7 +238,7 @@ map.on(L.Draw.Event.CREATED, async function (event) {
                 cities: selectedCities,
                 monitors: selectedMonitors,
                 states: statesTouched,
-                ntlStats: ntl
+                ntlStats: json_to_text
             }),
             headers: { "Content-Type": "application/json" }
         }).then(r => r.text());
