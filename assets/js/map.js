@@ -61,8 +61,10 @@ function resetStateStyle(layer){
 // --------------------------------------------------
 async function addNightLightsLayer() {
     try {
-        const mapInfo = await fetch(`${BACKEND}/ntlTileMap`)
-            .then(r => r.json());
+        const mapInfo = await fetch(`${BACKEND}/ntlTileMap`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" }
+        }).then(r => r.json());
         const tileUrl = mapInfo.urlFormat
             .replace("{mapid}", mapInfo.mapid)
             .replace("{token}", mapInfo.token);
