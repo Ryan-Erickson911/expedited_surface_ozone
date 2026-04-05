@@ -295,7 +295,7 @@ map.on(L.Draw.Event.CREATED, async function (event) {
         States: ${statesTouched.length}<br>
         Cities: ${selectedCities.length}<br>
         Monitors: ${selectedMonitors.length}<br><br>
-        <b>Summarizing Points...</b><br>
+        <b>Summarizing NTL layer...</b><br>
     `);
     try {
         // Nighttime Lights
@@ -306,7 +306,7 @@ map.on(L.Draw.Event.CREATED, async function (event) {
         }).then(r => r.json()); 
         
         var json_to_text = JSON.stringify(ntl)
-        summaryControl.appendContent(`<b>Average of Selection<br>${ntl.avg_rad_mean}<b>Max: <br>${ntl.avg_rad_max}<br>`);
+        summaryControl.appendContent(`<b>Average of Selection</b><br>${Number((ntl.avg_rad_mean).toFixed(1))}<br><b>Max:</b><br>${Number((ntl.avg_rad_max).toFixed(1))}<br>`);
         // AI Summary
         var aiSummary = await fetch(`${BACKEND}/aiSummary`, {
             method: "POST",
