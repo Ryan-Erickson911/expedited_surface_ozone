@@ -306,8 +306,7 @@ map.on(L.Draw.Event.CREATED, async function (event) {
         }).then(r => r.json()); 
         
         var json_to_text = JSON.stringify(ntl)
-
-        summaryControl.appendContent(`<b>Average of Selection<br>${json_to_text.avg_rad_mean}<b>Max: <br>${json_to_text.avg_rad_max}<br>`);
+        summaryControl.appendContent(`<b>Average of Selection<br>${ntl.avg_rad_mean}<b>Max: <br>${ntl.avg_rad_max}<br>`);
         // AI Summary
         var aiSummary = await fetch(`${BACKEND}/aiSummary`, {
             method: "POST",

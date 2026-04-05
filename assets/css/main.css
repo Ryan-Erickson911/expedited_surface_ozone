@@ -2166,7 +2166,7 @@ input, select, textarea {
 		box-shadow: 0 0 10px rgba(0,0,0,0.35);
 		font-size: 14px;
 		line-height: 1.4;
-		opacity: 0.8;
+		opacity: 0.97;
 	}
 
 	.stateinfo-box {
@@ -2179,7 +2179,7 @@ input, select, textarea {
 		box-shadow: 0 0 10px rgba(0,0,0,0.35);
 		font-size: 14px;
 		line-height: 1.4;
-		opacity: 0.8;
+		opacity: 0.9;
 	}
 	.stateinfo-close {
 		float: right;

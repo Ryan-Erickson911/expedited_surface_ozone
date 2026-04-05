@@ -120,25 +120,50 @@
                                         <br><h2>EPA Monitor and USA Cities GIS Application</h2>
 									</header>	
                                     <center><div id="map"></div></center>
-                                    <script src="assets/js/map.js"></script>						
+                                    <script src="assets/js/map.js"></script>
 								</div>
-								<div class="col-12">
+							</div>
+						</section>
+						<section class="container box feature2" style="width: 80%;">
+							<div class="row">
+								<div class="col-8">
 									<section>
-										<h3>This project is a continuation of my work with Dr. Guofeng Cao.</h3>
-									<p>
-										The EPA monitors numerous pollutants throughout the US. This map is meant to depict the spatial distribution of the EPA's monitoring locations. Overlayed are cities with a population greater than 100,000.
-										<br>
-										<br>
-										Click a state to zoom to it. Select a set of points with the tool on the left. Legend and more layer controls are coming soon! 
-									</p>
-									<h3>Working Updates</h3>
-									<p>
-										Backend Update in AWS EC2.<br>
-										Add more base GEE layers for pollutant model<br>
-										Add AI summary of information in polygon selection.<br>
-										Change points to be more discernable -> Font Awesome or Custom SVG<br>
-                                    	Include monitor and satillite information from the Tropospheric Ozone Assessment Report (<a href="https://igacproject.org/activities/TOAR">T.O.A.R</a>)<br>
-									</p>
+										<h2><br>An Ode to my MA</h2>
+										<h3 style="text-align:left;">Introduction</h3>
+										<p style="text-align:left;">
+											The EPA monitors numerous pollutants throughout the US. This map is meant to depict the spatial distribution of the EPA's monitoring locations as well as basic US city and state information. I created this to visualize the distribution of monitors for a certain time period before conducting an analysis for an AOI.
+											<br>
+											It might take a second or two for the layers to load as they are requested directly from GEE. Click a state to zoom to it. Select a set of points with the tool on the left. The tool will summarize the points and NTL layer via OpenAI's API. For now, the date slider is for the EPA monitor layer only. Daily updates are being made for streamlined data access and symbology.
+										</p>
+										<h3 style="text-align:left;">Sources and Metadata</h3>
+										<p style="text-align:left;">
+											The leaflet map is comprised of 4 main layers: US Cities with a population greater than 100k, US States and incooperated territories, EPA monitors, and night time lights. 
+											More cities are being added, with the current ones being added from the wikipedia page due to simplicity. Additional data can be found on the US Census Bureu website <a href="https://www.census.gov/data/tables/time-series/demo/popest/2020s-total-cities-and-towns.html">here.</a>
+											US States boundaries were downloaded for 2025 from the US Census Buraeu. I added basic descriptions of each state from their respective Wiki page.
+											The EPA monitor layer is a live return from the Air Quality System (AQS) API. 
+											The NTL layer represents the average DNB radiance values from the VIIRS Nighttime Day/Night Annual Band Composites V2.2 collection. It is served via Google Earth Engine.
+											<br>
+										</p>
+									</section>
+								</div>
+								<div class="col-4">
+									<section style="text-align:right;">
+										<h3>Data and API Docs</h3>
+										<ul class="divided">
+											<li><a href="https://aws.amazon.com/console/">AWS (Lambda and API Gateway)</a></li>
+											<li><a href="https://aqs.epa.gov/aqsweb/documents/data_api.html">Air Quality System (AQS) API</a></li>
+											<li><a href="https://earthengine.google.com/">Google Earth Engine</a></li>
+											<li><a href="https://console.cloud.google.com/">Google Cloud Project</a></li>
+											<li><a href="https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html">US TIGER/Line</a></li>
+											<li><a href="https://en.wikipedia.org/wiki/List_of_United_States_cities_by_population">US Cities</a></li>
+										</ul>
+										<h3>Working Updates</h3>
+										<p style="text-align:right;">
+											Blog Updates<br>
+											Add more base GEE layers<br>
+											Change points to be more discernable<br>
+											Include monitor and satillite information (<a href="https://igacproject.org/activities/TOAR">T.O.A.R</a>)<br>
+										</p>
 									</section>
 								</div>
 							</div>
