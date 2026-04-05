@@ -13,10 +13,11 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 // --------------------------------------------------
 // LAYERS
 // --------------------------------------------------
-const statesLayer = L.layerGroup().addTo(map);
-const citiesLayer = L.layerGroup().addTo(map);
-const epaLayer    = L.layerGroup().addTo(map);
-const drawnItems  = new L.FeatureGroup().addTo(map);
+const statesLayer      = L.layerGroup().addTo(map);
+const citiesLayer      = L.layerGroup().addTo(map);
+const epaLayer         = L.layerGroup().addTo(map);
+const nightLightsLayer = L.layerGroup().addTo(map);
+const drawnItems       = new L.FeatureGroup().addTo(map);
 // --------------------------------------------------
 // EPA SETTINGS
 // --------------------------------------------------
@@ -134,6 +135,7 @@ const DateSliderControl = L.Control.extend({
     }
 });
 const dateSliderControl = new DateSliderControl();
+map.addControl(dateSliderControl);
 // --------------------------------------------------
 // GEE NIGHT LIGHTS
 // --------------------------------------------------
@@ -380,6 +382,4 @@ L.control.layers(null, {
     "EPA Monitors": epaLayer,
     "Nighttime Lights": nightLightsLayer
 }).addTo(map);
-map.addControl(dateSliderControl);
-
 loadEPAMonitorsInView(); 
