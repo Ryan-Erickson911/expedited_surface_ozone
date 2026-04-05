@@ -59,11 +59,23 @@ function resetStateStyle(layer){
 // --------------------------------------------------
 // GEE NIGHT LIGHTS
 // --------------------------------------------------
-const nightLightsLayer = L.tileLayer(
-    `https://earthengine.googleapis.com/v1/projects/newapp-683f4/maps/88f1faba04b54bc4f3f579f64f8e8a80-99d2609d8c7b6f993856bb2ecc6f027d/tiles/{z}/{x}/{y}`,
-    { attribution: "GEE | VIIRS Nighttime Lights", opacity: 1 }
-);
-nightLightsLayer.addTo(map);
+async function addNightLightsLayer() {
+    try {
+        const mapInfo = await fetch(`${BACKEND}/ntlTileMap`)
+            .then(r => r.json());
+        const tileUrl = mapInfo.urlFormat
+            .replace("{mapid}", mapInfo.mapid)
+            .replace("{token}", mapInfo.token);
+        const nightLightsLayer = L.tileLayer(tileUrl, {
+            attribution: "GEE | VIIRS Nighttime Lights",
+            opacity: 1
+        });
+        nightLightsLayer.addTo(map);
+    } catch (err) {
+        console.error("Failed to load Nighttime Lights layer:", err);
+    }
+}
+addNightLightsLayer();
 // --------------------------------------------------
 // STATES
 // --------------------------------------------------
@@ -120,7 +132,6 @@ let citiesGeoJSON = new L.GeoJSON.AJAX("assets/data/geojson/usa_major_cities.geo
             Type: ${f.properties.Type}
         `)
 }).addTo(citiesLayer);
-
 // --------------------------------------------------
 // EPA MONITORS
 // --------------------------------------------------
@@ -131,7 +142,6 @@ let epaGeoJSON = L.geoJSON(null, {
         layer.bindPopup(`Monitor: ${feature.properties.site}`);
     }
 }).addTo(epaLayer);
-
 async function loadEPAMonitorsInView() {
     const b = map.getBounds();
     const { bdate, edate } = dateSliderControl.getDates();
@@ -152,19 +162,14 @@ async function loadEPAMonitorsInView() {
         properties: { site: `${m.state_code}-${m.county_code}-${m.site_number}` }
     })));
 }
-
-// --------------------------------------------------
 // AUTO LOAD + THROTTLE
-// --------------------------------------------------
+// -----------
 let monitorTimeout;
-
 function triggerMonitorLoad(){
     clearTimeout(monitorTimeout);
     monitorTimeout = setTimeout(loadEPAMonitorsInView, 400);
 }
-
 map.on('moveend', triggerMonitorLoad);
-
 // --------------------------------------------------
 // DRAW CONTROL
 // --------------------------------------------------
@@ -172,22 +177,17 @@ map.addControl(new L.Control.Draw({
     edit: { featureGroup: drawnItems },
     draw: { polygon: true, polyline:false, rectangle:false, circle:false, marker:false }
 }));
-
 // --------------------------------------------------
 // DRAW ANALYSIS
 // --------------------------------------------------
 map.on(L.Draw.Event.CREATED, async function (event) {
-
     drawnItems.clearLayers();
     drawnItems.addLayer(event.layer);
     const drawnPolygon = event.layer.toGeoJSON();
-
     let selectedCities = [];
     let selectedMonitors = [];
     let statesTouched = [];
-
     statesGeoJSON.eachLayer(resetStateStyle);
-
     // ---------------- Cities ----------------
     citiesGeoJSON.eachLayer(l => {
         const type = l.feature.properties.Type;
@@ -195,14 +195,12 @@ map.on(L.Draw.Event.CREATED, async function (event) {
         l.setStyle(cityStyle(type, inside));
         if (inside) selectedCities.push(l.feature.properties.Municipality);
     });
-
     // ---------------- Monitors ----------------
     epaGeoJSON.eachLayer(l => {
         const inside = turf.booleanPointInPolygon(l.toGeoJSON(), drawnPolygon);
         l.setStyle(monitorStyle(inside));
         if (inside) selectedMonitors.push(l.feature.properties.site);
     });
-
     // ---------------- States ----------------
     statesGeoJSON.eachLayer(l => {
         if (turf.booleanIntersects(l.toGeoJSON(), drawnPolygon)) {
@@ -218,19 +216,17 @@ map.on(L.Draw.Event.CREATED, async function (event) {
         Monitors: ${selectedMonitors.length}<br><br>
         <b>Summarizing Points...</b><br>
     `);
-
     try {
         // Nighttime Lights
-        console.log(JSON.stringify(drawnPolygon.geometry))
         var ntl = await fetch(`${BACKEND}/ntlSummary`, {
             method: "POST",
             body: JSON.stringify(drawnPolygon.geometry),
             headers: { "Content-Type": "application/json" }
         }).then(r => r.json()); 
-
+        
         var json_to_text = JSON.stringify(ntl)
-        summaryControl.appendContent(`<br><br>${json_to_text}`);
 
+        summaryControl.appendContent(`<b>Average of Selection<br>${json_to_text.avg_rad_mean}<b>Max: <br>${json_to_text.avg_rad_max}<br>`);
         // AI Summary
         var aiSummary = await fetch(`${BACKEND}/aiSummary`, {
             method: "POST",
@@ -242,15 +238,12 @@ map.on(L.Draw.Event.CREATED, async function (event) {
             }),
             headers: { "Content-Type": "application/json" }
         }).then(r => r.text());
-        console.log("AI SUMMARY RETURN: " + aiSummary)
         // Append instead of replace
         summaryControl.appendContent(`<br><br>${aiSummary}`);
-
     } catch (err) {
         summaryControl.appendContent(`<b>Error generating summary:</b><br>${err.message}`);
     }
 });
-
 // --------------------------------------------------
 // SUMMARY CONTROL (bottom-left)
 // --------------------------------------------------
@@ -271,7 +264,6 @@ const SummaryControl = L.Control.extend({
         this._div.innerHTML += html;
     }
 });
-
 // --------------------------------------------------
 // STATE INFO CONTROL (bottom-right)
 // --------------------------------------------------
@@ -297,7 +289,6 @@ const StateInfoControl = L.Control.extend({
             });
     }
 });
-
 const stateInfoControl = new StateInfoControl();
 const summaryControl = new SummaryControl();
 map.addControl(stateInfoControl);
@@ -402,4 +393,4 @@ const DateSliderControl = L.Control.extend({
 const dateSliderControl = new DateSliderControl();
 map.addControl(dateSliderControl);
 
-loadEPAMonitorsInView(); // first load — now safe to call
+loadEPAMonitorsInView(); 
